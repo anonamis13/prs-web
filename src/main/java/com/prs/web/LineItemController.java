@@ -65,10 +65,12 @@ public class LineItemController {
 	@PostMapping("/")
 	public JsonResponse createLineItem(@RequestBody LineItem l) {
 		JsonResponse jr = null;
+		
+		Request request = l.getRequestId();
+		double totalBackup = request.getTotal();
 
 		try {
 			l = lineItemRepo.save(l);
-			Request request = l.getRequestId();
 			request.setTotal(recalculateTotal(request));
 			requestRepo.save(request);
 			jr = JsonResponse.getInstance(l);
@@ -78,6 +80,7 @@ public class LineItemController {
 		} catch (Exception e) {
 			jr = JsonResponse.getErrorInstance("Error creating lineItem: " + e.getMessage());
 			e.printStackTrace();
+			request.setTotal(totalBackup);
 		}
 
 		return jr;
@@ -87,12 +90,18 @@ public class LineItemController {
 	public JsonResponse updateLineItem(@RequestBody LineItem l) {
 		JsonResponse jr = null;
 
+		Request request = l.getRequestId();
+		double totalBackup = request.getTotal();
+
 		try {
 			l = lineItemRepo.save(l);
+			request.setTotal(recalculateTotal(request));
+			requestRepo.save(request);
 			jr = JsonResponse.getInstance(l);
 		} catch (Exception e) {
 			jr = JsonResponse.getErrorInstance("Error updating lineItem: " + e.getMessage());
 			e.printStackTrace();
+			request.setTotal(totalBackup);
 		}
 
 		return jr;
@@ -102,12 +111,20 @@ public class LineItemController {
 	public JsonResponse deleteLineItem(@PathVariable int id) {
 		JsonResponse jr = null;
 
+		LineItem l = lineItemRepo.findRequestById(id);
+		Request reqId = l.getRequestId();
+		Request request = requestRepo.findAllById(reqId.getId());
+		double totalBackup = request.getTotal();
+
 		try {
 			lineItemRepo.deleteById(id);
+			request.setTotal(recalculateTotal(request));
+			requestRepo.save(request);
 			jr = JsonResponse.getInstance("LineItem id: " + id + " deleted successfully.");
 		} catch (Exception e) {
 			jr = JsonResponse.getErrorInstance("Error deleting lineItem: " + e.getMessage());
 			e.printStackTrace();
+			request.setTotal(totalBackup);
 		}
 
 		return jr;

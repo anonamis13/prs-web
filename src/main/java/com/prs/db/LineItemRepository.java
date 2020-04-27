@@ -12,4 +12,5 @@ public interface LineItemRepository extends JpaRepository<LineItem, Integer> {
 
 	List<LineItem> findAllByRequest(Optional<Request> request);
 	List<LineItem> findAllByRequest(Request request);
+	LineItem findRequestById(int id);
 }

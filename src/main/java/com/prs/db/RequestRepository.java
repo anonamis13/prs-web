@@ -11,4 +11,8 @@ import com.prs.business.User;
 public interface RequestRepository extends JpaRepository<Request, Integer> {
 
 	List<Request> findAllByStatusAndUserNot(String status, Optional<User> user);
+
+	Request findAllById(int id);
+
+	Request findAllById(Request reqId);
 }
